@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoteSimple</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#191919; --bg2:#212121; --bg3:#2a2a2a; --border:#333; --text:#e8e8e8; --muted:#888; --tag:#3a3a3a; --sidebar-w:240px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; overflow:hidden; }
+
+  /* SIDEBAR */
+  .sidebar { width:var(--sidebar-w); background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; padding:12px 0; }
+  .sidebar-header { display:flex; align-items:center; gap:10px; padding:8px 16px 14px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+  .workspace-icon { width:28px; height:28px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#fff; flex-shrink:0; }
+  .workspace-name { font-size:14px; font-weight:500; color:var(--text); }
+  .signup-wrap { padding:8px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+  .signup-btn { width:100%; padding:8px 12px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; color:#fff; font-family:'DM Sans',sans-serif; transition:opacity 0.15s; }
+  .signup-btn:hover { opacity:.85; }
+  .sidebar-section { padding:4px 8px; margin-bottom:4px; }
+  .sidebar-section-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); padding:4px 8px; margin-bottom:4px; font-family:'IBM Plex Mono',monospace; }
+  .sidebar-item { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:6px; cursor:pointer; font-size:14px; color:var(--muted); transition:background .15s,color .15s; user-select:none; }
+  .sidebar-item:hover { background:var(--bg3); color:var(--text); }
+  .sidebar-item.active { background:var(--bg3); color:var(--text); }
+  .sidebar-item .icon { font-size:15px; width:18px; text-align:center; }
+  .sidebar-item .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .sidebar-item .note-label { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .new-note-btn { margin:8px; padding:8px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px; transition:all .15s; font-family:'DM Sans',sans-serif; }
+  .new-note-btn:hover { border-color:#555; color:var(--text); }
+  .sidebar-footer { margin-top:auto; padding:8px; border-top:1px solid var(--border); display:flex; gap:6px; }
+  .sidebar-footer button { flex:1; padding:7px 6px; background:var(--bg3); border:1px solid var(--border); border-radius:7px; color:var(--muted); font-size:12px; cursor:pointer; font-family:'IBM Plex Mono',monospace; transition:all .15s; }
+  .sidebar-footer button:hover { color:var(--text); border-color:#555; }
+
+  /* MAIN */
+  .main { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; }
+  .toolbar { height:48px; display:flex; align-items:center; gap:4px; padding:0 16px; border-bottom:1px solid var(--border); background:var(--bg); flex-shrink:0; }
+  .toolbar-btn { min-width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:5px; cursor:pointer; color:var(--muted); font-size:13px; transition:all .15s; border:none; background:none; font-family:'IBM Plex Mono',monospace; padding:0 6px; }
+  .toolbar-btn:hover { background:var(--bg3); color:var(--text); }
+  .toolbar-btn.active { background:var(--bg3); color:var(--text); }
+  .toolbar-sep { width:1px; height:18px; background:var(--border); margin:0 4px; }
+  .toolbar-right { margin-left:auto; display:flex; align-items:center; gap:6px; }
+
+  /* EDITOR */
+  .editor-wrap { flex:1; overflow-y:auto; padding:48px 80px 120px; }
+  .editor-wrap::-webkit-scrollbar { width:4px; }
+  .editor-wrap::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .note-date { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); margin-bottom:24px; }
+  .note-title-input { font-size:32px; font-weight:500; color:var(--text); background:none; border:none; outline:none; width:100%; line-height:1.3; margin-bottom:20px; font-family:'DM Sans',sans-serif; }
+  .note-title-input::placeholder { color:var(--muted); }
+  .note-body { font-size:16px; line-height:1.75; color:#c8c8c8; background:none; border:none; outline:none; width:100%; min-height:400px; font-family:'DM Sans',sans-serif; white-space:pre-wrap; word-break:break-word; }
+  .note-body:empty::before { content:attr(data-placeholder); color:#444; pointer-events:none; display:block; }
+  .note-body b, .note-body strong { font-weight:700; color:#fff; }
+  .note-body i, .note-body em { font-style:italic; }
+  .note-body u { text-decoration:underline; }
+  .note-body h1 { font-size:24px; font-weight:500; color:var(--text); margin:12px 0 6px; }
+  .note-body h2 { font-size:19px; font-weight:500; color:var(--text); margin:10px 0 4px; }
+  .note-body ul, .note-body ol { padding-left:22px; margin:6px 0; }
+
+  /* TOGGLE GAME BUTTON bottom right */
+  .toggle-game-btn { position:fixed; bottom:18px; right:18px; width:32px; height:32px; background:var(--bg2); border:1px solid var(--border); border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.3; transition:opacity .3s; z-index:51; }
+  .toggle-game-btn:hover { opacity:0.85; }
+  .toggle-game-btn svg { width:15px; height:15px; fill:var(--muted); }
+
+  /* SECRET GAME BUTTON bottom left */
+  .secret-btn { position:fixed; bottom:18px; left:calc(var(--sidebar-w) + 12px); width:28px; height:28px; background:var(--bg2); border:1px solid var(--border); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.35; transition:opacity .3s, transform .4s cubic-bezier(.4,0,.2,1); z-index:50; }
+  .secret-btn:hover { opacity:0.9; }
+  .secret-btn.hidden { transform:translateY(70px); opacity:0 !important; pointer-events:none; }
+  .secret-btn svg { width:14px; height:14px; fill:var(--muted); }
+
+  /* GAME OVERLAY */
+  .game-overlay { position:fixed; inset:0; background:#0e0e0e; z-index:100; display:none; flex-direction:column; }
+  .game-overlay.visible { display:flex; }
+  .game-nav { height:52px; background:#111; border-bottom:1px solid #222; display:flex; align-items:center; padding:0 16px; gap:12px; flex-shrink:0; }
+  .game-back { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:7px; background:#1e1e1e; border:1px solid #333; color:#aaa; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; }
+  .game-back:hover { color:#fff; border-color:#555; }
+  .game-label { font-family:'IBM Plex Mono',monospace; font-size:12px; color:#555; margin-left:4px; }
+  .game-title-bar { flex:1; text-align:center; font-size:14px; font-weight:500; color:#aaa; font-family:'DM Sans',sans-serif; }
+  .fullscreen-btn { padding:6px 12px; border-radius:7px; background:#1e1e1e; border:1px solid #333; color:#aaa; font-size:12px; cursor:pointer; font-family:'IBM Plex Mono',monospace; transition:all .15s; }
+  .fullscreen-btn:hover { color:#fff; border-color:#555; }
+  .game-selector { padding:40px; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; overflow-y:auto; }
+  .game-card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:14px; padding:22px 18px; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; gap:10px; }
+  .game-card:hover { border-color:#444; background:#202020; transform:translateY(-2px); }
+  .game-icon { width:50px; height:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+  .game-card-name { font-size:15px; font-weight:500; color:#e0e0e0; }
+  .game-card-desc { font-size:12px; color:#666; line-height:1.5; }
+  .play-badge { margin-top:auto; align-self:flex-start; padding:4px 12px; border-radius:20px; font-size:11px; font-family:'IBM Plex Mono',monospace; background:#2a2a2a; color:#888; transition:all .2s; }
+  .game-card:hover .play-badge { background:#6366f1; color:#fff; }
+  .game-iframe-wrap { flex:1; position:relative; display:none; }
+  .game-iframe-wrap.visible { display:block; }
+  .game-iframe-wrap iframe { width:100%; height:100%; border:none; display:block; }
+  .open-new-tab { padding:10px 20px; border-radius:8px; background:#1e1e1e; border:1px solid #333; color:#aaa; font-size:14px; cursor:pointer; font-family:'DM Sans',sans-serif; text-decoration:none; transition:all .15s; }
+  .open-new-tab:hover { color:#fff; border-color:#666; }
+
+  /* MODAL */
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; align-items:center; justify-content:center; }
+  .modal-box { background:#212121; border:1px solid #333; border-radius:16px; padding:36px 40px; width:400px; max-width:92vw; position:relative; }
+  .modal-close { position:absolute; top:14px; right:16px; background:none; border:none; color:#666; font-size:20px; cursor:pointer; }
+  .modal-input { width:100%; padding:10px 14px; background:#2a2a2a; border:1px solid #333; border-radius:8px; color:#e8e8e8; font-size:14px; font-family:'DM Sans',sans-serif; outline:none; margin-bottom:10px; transition:border-color .15s; }
+  .modal-input:focus { border-color:#6366f1; }
+  .modal-btn { width:100%; padding:11px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none; border-radius:8px; color:#fff; font-size:14px; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; margin-top:4px; transition:opacity .15s; }
+  .modal-btn:hover { opacity:.85; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="workspace-icon">N</div>
+    <span class="workspace-name">NoteSimple</span>
+  </div>
+  <div class="signup-wrap">
+    <button class="signup-btn" onclick="openSignup()">✦ S'inscrire gratuitement</button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-item"><span class="icon">🔍</span><span class="note-label">Recherche</span></div>
+    <div class="sidebar-item"><span class="icon">🏠</span><span class="note-label">Accueil</span></div>
+    <div class="sidebar-item"><span class="icon">📥</span><span class="note-label">Boîte de réception</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Notes</div>
+    <div class="sidebar-item active" id="nav-3" onclick="switchNote(3)"><div class="dot" style="background:#6366f1"></div><span class="note-label" id="label-3">Note 1</span></div>
+    <div class="sidebar-item" id="nav-4" onclick="switchNote(4)"><div class="dot" style="background:#10b981"></div><span class="note-label" id="label-4">Note 2</span></div>
+    <div class="sidebar-item" id="nav-5" onclick="switchNote(5)"><div class="dot" style="background:#f59e0b"></div><span class="note-label" id="label-5">Note 3</span></div>
+    <div class="sidebar-item" id="nav-6" onclick="switchNote(6)"><div class="dot" style="background:#ef4444"></div><span class="note-label" id="label-6">Note 4</span></div>
+    <div class="sidebar-item" id="nav-7" onclick="switchNote(7)"><div class="dot" style="background:#8b5cf6"></div><span class="note-label" id="label-7">Note 5</span></div>
+  </div>
+  <button class="new-note-btn"><span>+</span> Nouvelle note</button>
+  <div class="sidebar-footer">
+    <button onclick="exportNotes()" title="Exporter toutes les notes">⬇ Exporter</button>
+    <button onclick="triggerImport()" title="Importer des notes">⬆ Importer</button>
+    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importNotes(event)">
+  </div>
+</div>
+
+<!-- ═══════════ MAIN EDITOR ═══════════ -->
+<div class="main">
+  <div class="toolbar">
+    <button class="toolbar-btn" id="btn-bold" onclick="fmt('bold')" title="Gras (Ctrl+B)"><b>B</b></button>
+    <button class="toolbar-btn" id="btn-italic" onclick="fmt('italic')" title="Italique (Ctrl+I)"><i>I</i></button>
+    <button class="toolbar-btn" id="btn-underline" onclick="fmt('underline')" title="Souligner (Ctrl+U)"><u>U</u></button>
+    <div class="toolbar-sep"></div>
+    <button class="toolbar-btn" onclick="fmt('formatBlock','h1')" title="Titre 1">H1</button>
+    <button class="toolbar-btn" onclick="fmt('formatBlock','h2')" title="Titre 2">H2</button>
+    <button class="toolbar-btn" onclick="fmt('insertUnorderedList')" title="Liste à puces">≡</button>
+    <button class="toolbar-btn" onclick="fmt('removeFormat')" title="Supprimer le formatage" style="font-size:11px">✕fmt</button>
+    <div class="toolbar-right">
+      <button class="toolbar-btn" onclick="exportCurrentNote()" title="Télécharger cette note en .txt" style="font-size:11px; padding:0 8px; width:auto;">⬇ .txt</button>
+    </div>
+  </div>
+  <div class="editor-wrap">
+    <div class="note-date" id="note-date">Aujourd'hui</div>
+    <input class="note-title-input" id="note-title" placeholder="Titre de la note..." oninput="saveCurrentNote()">
+    <div class="note-body" id="note-body" contenteditable="true" data-placeholder="Commence à écrire ici..." oninput="saveCurrentNote(); updateToolbarState()"></div>
+  </div>
+</div>
+
+<!-- ═══════════ TOGGLE GAME BTN (bottom right) ═══════════ -->
+<div class="toggle-game-btn" id="toggle-game-btn" onclick="toggleGameBtn()" title="Masquer le bouton jeux">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 4H7a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h10a5 5 0 0 0 5-5V9a5 5 0 0 0-5-5zm-7 8H8v2H6v-2H4v-2h2V8h2v2h2v2zm4.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+  </svg>
+</div>
+
+<!-- ═══════════ SECRET GAME BTN (bottom left) ═══════════ -->
+<div class="secret-btn" id="secret-btn" onclick="openGames()" title="Jeux">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 4H7a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h10a5 5 0 0 0 5-5V9a5 5 0 0 0-5-5zm-7 8H8v2H6v-2H4v-2h2V8h2v2h2v2zm4.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+  </svg>
+</div>
+
+<!-- ═══════════ SIGNUP MODAL ═══════════ -->
+<div class="modal-bg" id="signup-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeSignup()">✕</button>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:22px;">
+      <div style="width:32px; height:32px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600; color:#fff;">N</div>
+      <span style="font-size:18px; font-weight:500; color:#e8e8e8;">NoteSimple</span>
+    </div>
+    <h2 style="font-size:22px; font-weight:500; color:#e8e8e8; margin-bottom:6px;">Créer un compte</h2>
+    <p style="font-size:14px; color:#888; margin-bottom:22px;">Gratuit pour toujours. Aucune carte requise.</p>
+    <input class="modal-input" type="text" placeholder="Prénom et nom">
+    <input class="modal-input" type="email" placeholder="Adresse e-mail">
+    <input class="modal-input" type="password" placeholder="Mot de passe">
+    <button class="modal-btn" id="signup-submit" onclick="fakeSignup()">Créer mon compte →</button>
+    <p style="font-size:12px; color:#555; margin-top:16px; text-align:center;">Déjà un compte ? <span style="color:#888; cursor:pointer; text-decoration:underline;" onclick="closeSignup()">Se connecter</span></p>
+  </div>
+</div>
+
+<!-- ═══════════ GAME OVERLAY ═══════════ -->
+<div class="game-overlay" id="game-overlay">
+  <div class="game-nav">
+    <div class="game-back" onclick="closeGames()">← Retour aux notes</div>
+    <span class="game-label">// mode jeu</span>
+    <div class="game-title-bar" id="game-title-bar">Choisir un jeu</div>
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Plein écran</button>
+  </div>
+
+  <div class="game-selector" id="game-selector">
+    <div class="game-card" onclick="launchGame(0)">
+      <div class="game-icon" style="background:#1a2a4a">🏄</div>
+      <div class="game-card-name">Subway Surfers</div>
+      <div class="game-card-desc">Course infinie dans les rues. Évite les obstacles et bats ton record !</div>
+      <div class="play-badge">▶ Jouer</div>
+    </div>
+    <div class="game-card" onclick="launchGame(1)">
+      <div class="game-icon" style="background:#1a3a1a">🎈</div>
+      <div class="game-card-name">Bloons TD 4</div>
+      <div class="game-card-desc">Tower defense classique. Place tes singes et éclate les ballons !</div>
+      <div class="play-badge">▶ Jouer</div>
+    </div>
+    <div class="game-card" onclick="launchGame(2)">
+      <div class="game-icon" style="background:#2a1a1a">💀</div>
+      <div class="game-card-name">Death Run 3D</div>
+      <div class="game-card-desc">Course folle en 3D. Esquive les pièges et survive le plus longtemps possible.</div>
+      <div class="play-badge">▶ Jouer</div>
+    </div>
+    <div class="game-card" onclick="launchGame(3)">
+      <div class="game-icon" style="background:#2a2a1a">🍪</div>
+      <div class="game-card-name">Cookie Clicker</div>
+      <div class="game-card-desc">Le clicker addictif légendaire. Clique, améliore, et produis des cookies à l'infini.</div>
+      <div class="play-badge">▶ Jouer</div>
+    </div>
+    <div class="game-card" onclick="launchGame(4)">
+      <div class="game-icon" style="background:#1a1a2e">⚡</div>
+      <div class="game-card-name">Geometry Dash</div>
+      <div class="game-card-desc">Saute en rythme et évite les obstacles dans ce jeu musical addictif !</div>
+      <div class="play-badge">▶ Jouer</div>
+    </div>
+    <div class="game-card" onclick="launchGame(5)">
+      <div class="game-icon" style="background:#2a1a2e">🧠</div>
+      <div class="game-card-name">Steal a Brainrot 2</div>
+      <div class="game-card-desc">Vole le brainrot de tes adversaires dans ce jeu déjanté et chaotique !</div>
+      <div class="play-badge">▶ Jouer</div>
+    </div>
+    <div class="game-card" onclick="launchGame(6)">
+      <div class="game-icon" style="background:#1a2e1a">🪂</div>
+      <div class="game-card-name">Just Fall</div>
+      <div class="game-card-desc">Tombe et survie ! Évite les plateformes qui s'effondrent sous tes pieds.</div>
+      <div class="play-badge">▶ Jouer</div>
+    </div>
+  </div>
+
+  <div class="game-iframe-wrap" id="game-iframe-wrap">
+    <iframe id="game-frame" src="" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals"></iframe>
+    <div id="iframe-error" style="display:none; position:absolute; inset:0; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:#0e0e0e; color:#666; font-size:15px; font-family:'DM Sans',sans-serif;">
+      <span>⚠️ Ce jeu bloque l'intégration.</span>
+      <a class="open-new-tab" id="open-tab-btn" href="#" target="_blank">Ouvrir dans un nouvel onglet</a>
+      <span style="font-size:13px; color:#444; cursor:pointer;" onclick="backToSelector()">← Choisir un autre jeu</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════
+   GAMES
+══════════════════ */
+const GAMES = [
+  { name:'Subway Surfers',     url:'https://geet.in.net/get/subway-surfers/game.html' },
+  { name:'Bloons TD 4',        url:'https://geet.in.net/get/bloonstd-4/game.html' },
+  { name:'Death Run 3D',       url:'https://geet.in.net/get/death-run-3d/game.html' },
+  { name:'Cookie Clicker',     url:'https://geet.in.net/get/cookie-clicker/game.html' },
+  { name:'Geometry Dash',      url:'https://geet.in.net/get/geometry-dash/game.html' },
+  { name:'Steal a Brainrot 2', url:'https://classroomlesson.github.io/basic-ruffle-player/html/steal_a_brainrot_2/index.html' },
+  { name:'Just Fall',          url:'https://geet.in.net/get/just-fall/game.html' }
+];
+
+function openGames() {
+  document.getElementById('game-overlay').classList.add('visible');
+  document.getElementById('game-selector').style.display = 'grid';
+  document.getElementById('game-iframe-wrap').classList.remove('visible');
+  document.getElementById('game-title-bar').textContent = 'Choisir un jeu';
+}
+function closeGames() {
+  document.getElementById('game-overlay').classList.remove('visible');
+  document.getElementById('game-frame').src = '';
+}
+function backToSelector() {
+  document.getElementById('game-frame').src = '';
+  document.getElementById('game-selector').style.display = 'grid';
+  document.getElementById('game-iframe-wrap').classList.remove('visible');
+  document.getElementById('game-title-bar').textContent = 'Choisir un jeu';
+}
+function launchGame(idx) {
+  const g = GAMES[idx];
+  document.getElementById('game-selector').style.display = 'none';
+  document.getElementById('game-iframe-wrap').classList.add('visible');
+  document.getElementById('game-title-bar').textContent = g.name;
+  document.getElementById('open-tab-btn').href = g.url;
+  document.getElementById('iframe-error').style.display = 'none';
+  document.getElementById('game-frame').src = g.url;
+}
+function toggleFullscreen() {
+  const el = document.getElementById('game-overlay');
+  if (!document.fullscreenElement) el.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen();
+}
+
+/* ══════════════════
+   TOGGLE GAME BUTTON
+══════════════════ */
+let gameBtnVisible = true;
+function toggleGameBtn() {
+  gameBtnVisible = !gameBtnVisible;
+  const sb = document.getElementById('secret-btn');
+  const tb = document.getElementById('toggle-game-btn');
+  sb.classList.toggle('hidden', !gameBtnVisible);
+  tb.title = gameBtnVisible ? 'Masquer le bouton jeux' : 'Afficher le bouton jeux';
+  tb.style.opacity = gameBtnVisible ? '0.3' : '0.65';
+}
+
+/* ══════════════════
+   NOTES
+══════════════════ */
+const NOTE_IDS = [3,4,5,6,7];
+const notes = {};
+NOTE_IDS.forEach((id,i) => notes[id] = { title:'', html:'', date:'Aujourd\'hui', label:'Note '+(i+1) });
+let currentNote = 3;
+
+function switchNote(id) {
+  saveCurrentNote();
+  currentNote = id;
+  NOTE_IDS.forEach(i => document.getElementById('nav-'+i).classList.toggle('active', i===id));
+  const n = notes[id];
+  document.getElementById('note-title').value = n.title;
+  document.getElementById('note-body').innerHTML = n.html;
+  document.getElementById('note-date').textContent = n.date;
+}
+
+function saveCurrentNote() {
+  const n = notes[currentNote];
+  if (!n) return;
+  n.title = document.getElementById('note-title').value;
+  n.html  = document.getElementById('note-body').innerHTML;
+  const now = new Date();
+  n.date = 'Modifié à ' + String(now.getHours()).padStart(2,'0') + 'h' + String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('note-date').textContent = n.date;
+  const lbl = n.title.trim() || n.label;
+  const el = document.getElementById('label-'+currentNote);
+  if (el) el.textContent = lbl.substring(0,22);
+}
+
+/* ══════════════════
+   RICH TEXT
+══════════════════ */
+function fmt(cmd, val) {
+  document.getElementById('note-body').focus();
+  document.execCommand(cmd, false, val || null);
+  updateToolbarState();
+  saveCurrentNote();
+}
+
+function updateToolbarState() {
+  document.getElementById('btn-bold').classList.toggle('active', document.queryCommandState('bold'));
+  document.getElementById('btn-italic').classList.toggle('active', document.queryCommandState('italic'));
+  document.getElementById('btn-underline').classList.toggle('active', document.queryCommandState('underline'));
+}
+
+document.getElementById('note-body').addEventListener('keyup', updateToolbarState);
+document.getElementById('note-body').addEventListener('mouseup', updateToolbarState);
+
+document.addEventListener('keydown', e => {
+  const body = document.getElementById('note-body');
+  if ((e.ctrlKey || e.metaKey) && document.activeElement === body) {
+    if (e.key === 'b') { e.preventDefault(); fmt('bold'); }
+    if (e.key === 'i') { e.preventDefault(); fmt('italic'); }
+    if (e.key === 'u') { e.preventDefault(); fmt('underline'); }
+  }
+  if (e.key === 'Escape' && document.getElementById('game-overlay').classList.contains('visible')) {
+    if (document.getElementById('game-selector').style.display !== 'grid') backToSelector();
+    else closeGames();
+  }
+});
+
+/* ══════════════════
+   EXPORT / IMPORT
+══════════════════ */
+function exportNotes() {
+  saveCurrentNote();
+  const blob = new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'notesimple-export.json';
+  a.click();
+}
+
+function exportCurrentNote() {
+  saveCurrentNote();
+  const n = notes[currentNote];
+  const tmp = document.createElement('div');
+  tmp.innerHTML = n.html;
+  const title = n.title ? n.title + '\n' + '─'.repeat(n.title.length) + '\n\n' : '';
+  const blob = new Blob([title + (tmp.innerText || tmp.textContent)], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (n.title || 'note') + '.txt';
+  a.click();
+}
+
+function triggerImport() { document.getElementById('import-input').click(); }
+
+function importNotes(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      NOTE_IDS.forEach(id => {
+        if (data[id]) {
+          notes[id].title = data[id].title || '';
+          notes[id].html  = data[id].html  || '';
+          notes[id].date  = data[id].date  || 'Importé';
+        }
+      });
+      switchNote(currentNote);
+      toast('Notes importées avec succès !');
+    } catch { toast('Fichier invalide — JSON attendu.', true); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* ══════════════════
+   TOAST
+══════════════════ */
+function toast(msg, err) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:62px;left:50%;transform:translateX(-50%);background:${err?'#2a1010':'#0f2a1a'};color:${err?'#f87171':'#4ade80'};border:1px solid ${err?'#7f1d1d':'#14532d'};padding:10px 20px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;z-index:400;white-space:nowrap;transition:opacity .4s;`;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 2600);
+}
+
+/* ══════════════════
+   SIGNUP
+══════════════════ */
+function openSignup() { document.getElementById('signup-modal').style.display='flex'; }
+function closeSignup() { document.getElementById('signup-modal').style.display='none'; }
+function fakeSignup() {
+  const btn = document.getElementById('signup-submit');
+  btn.textContent = '✓ Compte créé !';
+  btn.style.background = '#059669';
+  setTimeout(()=>{ closeSignup(); btn.textContent='Créer mon compte →'; btn.style.background=''; }, 1400);
+}
+</script>
+</body>
+</html>
