@@ -6,31 +6,37 @@
 <title>NoteSimple</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#191919; --bg2:#212121; --bg3:#2a2a2a; --border:#333; --text:#e8e8e8; --muted:#888; --tag:#3a3a3a; --sidebar-w:240px; }
+  :root { --bg:#191919; --bg2:#212121; --bg3:#2a2a2a; --border:#333; --text:#e8e8e8; --muted:#666; --sidebar-w:240px; }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; overflow:hidden; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+  .app-body { display:flex; flex:1; overflow:hidden; }
+
+  /* STATUS BAR */
+  .status-bar { height:22px; background:#111; border-bottom:1px solid #222; display:flex; align-items:center; padding:0 14px; gap:16px; flex-shrink:0; }
+  .status-item { font-family:'IBM Plex Mono',monospace; font-size:10px; color:#3a3a3a; }
+  .status-hint { margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#2d2d2d; cursor:default; user-select:none; }
 
   /* SIDEBAR */
-  .sidebar { width:var(--sidebar-w); background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; padding:12px 0; }
+  .sidebar { width:var(--sidebar-w); background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; padding:12px 0; overflow:hidden; }
   .sidebar-header { display:flex; align-items:center; gap:10px; padding:8px 16px 14px; border-bottom:1px solid var(--border); margin-bottom:8px; }
   .workspace-icon { width:28px; height:28px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#fff; flex-shrink:0; }
   .workspace-name { font-size:14px; font-weight:500; color:var(--text); }
   .signup-wrap { padding:8px; border-bottom:1px solid var(--border); margin-bottom:8px; }
-  .signup-btn { width:100%; padding:8px 12px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; color:#fff; font-family:'DM Sans',sans-serif; transition:opacity 0.15s; }
+  .signup-btn { width:100%; padding:8px 12px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; color:#fff; font-family:'DM Sans',sans-serif; transition:opacity .15s; }
   .signup-btn:hover { opacity:.85; }
   .sidebar-section { padding:4px 8px; margin-bottom:4px; }
-  .sidebar-section-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); padding:4px 8px; margin-bottom:4px; font-family:'IBM Plex Mono',monospace; }
+  .sidebar-section-label { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:#3a3a3a; padding:4px 8px; margin-bottom:4px; font-family:'IBM Plex Mono',monospace; }
   .sidebar-item { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:6px; cursor:pointer; font-size:14px; color:var(--muted); transition:background .15s,color .15s; user-select:none; }
   .sidebar-item:hover { background:var(--bg3); color:var(--text); }
   .sidebar-item.active { background:var(--bg3); color:var(--text); }
-  .sidebar-item .icon { font-size:15px; width:18px; text-align:center; }
-  .sidebar-item .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .sidebar-item .sicon { font-size:14px; width:18px; text-align:center; }
+  .sidebar-item .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
   .sidebar-item .note-label { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .new-note-btn { margin:8px; padding:8px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px; transition:all .15s; font-family:'DM Sans',sans-serif; }
-  .new-note-btn:hover { border-color:#555; color:var(--text); }
-  .sidebar-footer { margin-top:auto; padding:8px; border-top:1px solid var(--border); display:flex; gap:6px; }
-  .sidebar-footer button { flex:1; padding:7px 6px; background:var(--bg3); border:1px solid var(--border); border-radius:7px; color:var(--muted); font-size:12px; cursor:pointer; font-family:'IBM Plex Mono',monospace; transition:all .15s; }
-  .sidebar-footer button:hover { color:var(--text); border-color:#555; }
+  .new-note-btn { margin:8px; padding:8px 12px; background:transparent; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:13px; color:#3a3a3a; display:flex; align-items:center; gap:8px; transition:all .15s; font-family:'DM Sans',sans-serif; }
+  .new-note-btn:hover { border-color:#555; color:var(--muted); }
+  .sidebar-footer { margin-top:auto; padding:8px; border-top:1px solid #222; display:flex; gap:6px; }
+  .sidebar-footer button { flex:1; padding:7px 4px; background:transparent; border:1px solid #252525; border-radius:7px; color:#333; font-size:11px; cursor:pointer; font-family:'IBM Plex Mono',monospace; transition:all .15s; }
+  .sidebar-footer button:hover { color:var(--muted); border-color:#444; }
 
   /* MAIN */
   .main { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; }
@@ -40,71 +46,90 @@
   .toolbar-btn.active { background:var(--bg3); color:var(--text); }
   .toolbar-sep { width:1px; height:18px; background:var(--border); margin:0 4px; }
   .toolbar-right { margin-left:auto; display:flex; align-items:center; gap:6px; }
-
-  /* EDITOR */
-  .editor-wrap { flex:1; overflow-y:auto; padding:48px 80px 120px; }
+  .editor-wrap { flex:1; overflow-y:auto; padding:48px 80px 80px; }
   .editor-wrap::-webkit-scrollbar { width:4px; }
   .editor-wrap::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-  .note-date { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); margin-bottom:24px; }
-  .note-title-input { font-size:32px; font-weight:500; color:var(--text); background:none; border:none; outline:none; width:100%; line-height:1.3; margin-bottom:20px; font-family:'DM Sans',sans-serif; }
-  .note-title-input::placeholder { color:var(--muted); }
-  .note-body { font-size:16px; line-height:1.75; color:#c8c8c8; background:none; border:none; outline:none; width:100%; min-height:400px; font-family:'DM Sans',sans-serif; white-space:pre-wrap; word-break:break-word; }
-  .note-body:empty::before { content:attr(data-placeholder); color:#444; pointer-events:none; display:block; }
-  .note-body b, .note-body strong { font-weight:700; color:#fff; }
-  .note-body i, .note-body em { font-style:italic; }
+  .note-date { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#444; margin-bottom:22px; }
+  .note-title-input { font-size:30px; font-weight:500; color:var(--text); background:none; border:none; outline:none; width:100%; line-height:1.3; margin-bottom:18px; font-family:'DM Sans',sans-serif; }
+  .note-title-input::placeholder { color:#333; }
+  .note-body { font-size:15px; line-height:1.8; color:#aaa; background:none; border:none; outline:none; width:100%; min-height:360px; font-family:'DM Sans',sans-serif; word-break:break-word; }
+  .note-body:empty::before { content:attr(data-placeholder); color:#333; pointer-events:none; display:block; }
+  .note-body b, .note-body strong { font-weight:700; color:#ddd; }
+  .note-body i, .note-body em { font-style:italic; color:#bbb; }
   .note-body u { text-decoration:underline; }
-  .note-body h1 { font-size:24px; font-weight:500; color:var(--text); margin:12px 0 6px; }
-  .note-body h2 { font-size:19px; font-weight:500; color:var(--text); margin:10px 0 4px; }
+  .note-body h1 { font-size:22px; font-weight:500; color:var(--text); margin:14px 0 6px; }
+  .note-body h2 { font-size:18px; font-weight:500; color:var(--text); margin:10px 0 4px; }
   .note-body ul, .note-body ol { padding-left:22px; margin:6px 0; }
 
-  /* TOGGLE GAME BUTTON bottom right */
-  .toggle-game-btn { position:fixed; bottom:18px; right:18px; width:32px; height:32px; background:var(--bg2); border:1px solid var(--border); border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.3; transition:opacity .3s; z-index:51; }
-  .toggle-game-btn:hover { opacity:0.85; }
-  .toggle-game-btn svg { width:15px; height:15px; fill:var(--muted); }
-
-  /* SECRET GAME BUTTON bottom left */
-  .secret-btn { position:fixed; bottom:18px; left:calc(var(--sidebar-w) + 12px); width:28px; height:28px; background:var(--bg2); border:1px solid var(--border); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0.35; transition:opacity .3s, transform .4s cubic-bezier(.4,0,.2,1); z-index:50; }
-  .secret-btn:hover { opacity:0.9; }
-  .secret-btn.hidden { transform:translateY(70px); opacity:0 !important; pointer-events:none; }
-  .secret-btn svg { width:14px; height:14px; fill:var(--muted); }
+  /* CODE PROMPT AREA */
+  .code-prompt { position:fixed; bottom:0; left:0; right:0; height:22px; background:#111; border-top:1px solid #1a1a1a; display:flex; align-items:center; padding:0 14px; z-index:49; }
+  .code-prompt-text { font-family:'IBM Plex Mono',monospace; font-size:10px; color:#252525; }
+  .code-cursor { font-family:'IBM Plex Mono',monospace; font-size:10px; color:#252525; margin-left:1px; animation:blink 1.2s step-end infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  .code-dots { display:flex; gap:3px; margin-left:auto; }
+  .code-dot { width:4px; height:4px; border-radius:50%; background:#1e1e1e; }
 
   /* GAME OVERLAY */
   .game-overlay { position:fixed; inset:0; background:#0e0e0e; z-index:100; display:none; flex-direction:column; }
   .game-overlay.visible { display:flex; }
-  .game-nav { height:52px; background:#111; border-bottom:1px solid #222; display:flex; align-items:center; padding:0 16px; gap:12px; flex-shrink:0; }
-  .game-back { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:7px; background:#1e1e1e; border:1px solid #333; color:#aaa; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; }
-  .game-back:hover { color:#fff; border-color:#555; }
-  .game-label { font-family:'IBM Plex Mono',monospace; font-size:12px; color:#555; margin-left:4px; }
-  .game-title-bar { flex:1; text-align:center; font-size:14px; font-weight:500; color:#aaa; font-family:'DM Sans',sans-serif; }
-  .fullscreen-btn { padding:6px 12px; border-radius:7px; background:#1e1e1e; border:1px solid #333; color:#aaa; font-size:12px; cursor:pointer; font-family:'IBM Plex Mono',monospace; transition:all .15s; }
-  .fullscreen-btn:hover { color:#fff; border-color:#555; }
-  .game-selector { padding:40px; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; overflow-y:auto; }
-  .game-card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:14px; padding:22px 18px; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; gap:10px; }
-  .game-card:hover { border-color:#444; background:#202020; transform:translateY(-2px); }
-  .game-icon { width:50px; height:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
-  .game-card-name { font-size:15px; font-weight:500; color:#e0e0e0; }
-  .game-card-desc { font-size:12px; color:#666; line-height:1.5; }
-  .play-badge { margin-top:auto; align-self:flex-start; padding:4px 12px; border-radius:20px; font-size:11px; font-family:'IBM Plex Mono',monospace; background:#2a2a2a; color:#888; transition:all .2s; }
+  .game-nav { height:50px; background:#111; border-bottom:1px solid #1e1e1e; display:flex; align-items:center; padding:0 16px; gap:10px; flex-shrink:0; }
+  .game-back { display:flex; align-items:center; gap:6px; padding:5px 11px; border-radius:7px; background:#181818; border:1px solid #2a2a2a; color:#888; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; }
+  .game-back:hover { color:#fff; border-color:#444; }
+  .game-title-bar { flex:1; text-align:center; font-size:13px; font-weight:500; color:#666; font-family:'IBM Plex Mono',monospace; }
+  .fullscreen-btn { padding:5px 11px; border-radius:7px; background:#181818; border:1px solid #2a2a2a; color:#666; font-size:11px; cursor:pointer; font-family:'IBM Plex Mono',monospace; transition:all .15s; }
+  .fullscreen-btn:hover { color:#fff; border-color:#444; }
+  .game-selector { padding:32px; display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; overflow-y:auto; }
+  .game-card { background:#141414; border:1px solid #222; border-radius:12px; padding:20px 16px; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; gap:9px; }
+  .game-card:hover { border-color:#3a3a3a; background:#1a1a1a; transform:translateY(-2px); }
+  .game-icon { width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  .game-card-name { font-size:14px; font-weight:500; color:#ccc; }
+  .game-card-desc { font-size:11px; color:#555; line-height:1.5; flex:1; }
+  .play-badge { align-self:flex-start; padding:3px 10px; border-radius:20px; font-size:10px; font-family:'IBM Plex Mono',monospace; background:#1e1e1e; color:#555; transition:all .2s; }
   .game-card:hover .play-badge { background:#6366f1; color:#fff; }
   .game-iframe-wrap { flex:1; position:relative; display:none; }
   .game-iframe-wrap.visible { display:block; }
   .game-iframe-wrap iframe { width:100%; height:100%; border:none; display:block; }
-  .open-new-tab { padding:10px 20px; border-radius:8px; background:#1e1e1e; border:1px solid #333; color:#aaa; font-size:14px; cursor:pointer; font-family:'DM Sans',sans-serif; text-decoration:none; transition:all .15s; }
-  .open-new-tab:hover { color:#fff; border-color:#666; }
+  .iframe-fallback { display:none; position:absolute; inset:0; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:#0e0e0e; }
+  .iframe-fallback.visible { display:flex; }
+  .open-new-tab { padding:9px 18px; border-radius:8px; background:#1a1a1a; border:1px solid #2a2a2a; color:#888; font-size:13px; text-decoration:none; transition:all .15s; font-family:'DM Sans',sans-serif; }
+  .open-new-tab:hover { color:#fff; border-color:#555; }
 
   /* MODAL */
-  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; align-items:center; justify-content:center; }
-  .modal-box { background:#212121; border:1px solid #333; border-radius:16px; padding:36px 40px; width:400px; max-width:92vw; position:relative; }
-  .modal-close { position:absolute; top:14px; right:16px; background:none; border:none; color:#666; font-size:20px; cursor:pointer; }
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:200; align-items:center; justify-content:center; }
+  .modal-bg.open { display:flex; }
+  .modal-box { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:16px; padding:36px 38px; width:390px; max-width:92vw; position:relative; }
+  .modal-close { position:absolute; top:14px; right:16px; background:none; border:none; color:#555; font-size:20px; cursor:pointer; transition:color .15s; }
+  .modal-close:hover { color:#aaa; }
   .modal-input { width:100%; padding:10px 14px; background:#2a2a2a; border:1px solid #333; border-radius:8px; color:#e8e8e8; font-size:14px; font-family:'DM Sans',sans-serif; outline:none; margin-bottom:10px; transition:border-color .15s; }
   .modal-input:focus { border-color:#6366f1; }
   .modal-btn { width:100%; padding:11px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border:none; border-radius:8px; color:#fff; font-size:14px; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; margin-top:4px; transition:opacity .15s; }
   .modal-btn:hover { opacity:.85; }
+
+  /* SECRET TOGGLE — bottom right, barely visible */
+  .secret-toggle { position:fixed; bottom:22px; right:6px; width:18px; height:18px; background:transparent; border:none; cursor:pointer; z-index:52; opacity:0.08; transition:opacity .3s; padding:0; }
+  .secret-toggle:hover { opacity:0.35; }
+  .secret-toggle svg { width:18px; height:18px; fill:#555; }
+
+  /* GAME BTN — bottom left, initially barely visible */
+  .game-btn { position:fixed; bottom:22px; left:calc(var(--sidebar-w) + 8px); width:20px; height:20px; background:transparent; border:none; cursor:pointer; z-index:50; opacity:0; transition:opacity .4s, transform .4s cubic-bezier(.4,0,.2,1); padding:0; }
+  .game-btn:hover { opacity:0.5 !important; }
+  .game-btn.show { opacity:0.12; }
+  .game-btn.hidden-btn { transform:translateY(50px); opacity:0 !important; pointer-events:none; }
+  .game-btn svg { width:20px; height:20px; fill:#666; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════ SIDEBAR ═══════════ -->
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span class="status-item">NoteSimple v2.1</span>
+  <span class="status-item" id="status-saved">● Sauvegardé</span>
+  <span class="status-hint" id="status-hint">Tapez pour commencer</span>
+</div>
+
+<div class="app-body">
+
+<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-header">
     <div class="workspace-icon">N</div>
@@ -114,140 +139,118 @@
     <button class="signup-btn" onclick="openSignup()">✦ S'inscrire gratuitement</button>
   </div>
   <div class="sidebar-section">
-    <div class="sidebar-item"><span class="icon">🔍</span><span class="note-label">Recherche</span></div>
-    <div class="sidebar-item"><span class="icon">🏠</span><span class="note-label">Accueil</span></div>
-    <div class="sidebar-item"><span class="icon">📥</span><span class="note-label">Boîte de réception</span></div>
+    <div class="sidebar-item"><span class="sicon">🔍</span><span class="note-label">Recherche</span></div>
+    <div class="sidebar-item"><span class="sicon">🏠</span><span class="note-label">Accueil</span></div>
+    <div class="sidebar-item"><span class="sicon">📥</span><span class="note-label">Boîte de réception</span></div>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Notes</div>
-    <div class="sidebar-item active" id="nav-3" onclick="switchNote(3)"><div class="dot" style="background:#6366f1"></div><span class="note-label" id="label-3">Note 1</span></div>
-    <div class="sidebar-item" id="nav-4" onclick="switchNote(4)"><div class="dot" style="background:#10b981"></div><span class="note-label" id="label-4">Note 2</span></div>
-    <div class="sidebar-item" id="nav-5" onclick="switchNote(5)"><div class="dot" style="background:#f59e0b"></div><span class="note-label" id="label-5">Note 3</span></div>
-    <div class="sidebar-item" id="nav-6" onclick="switchNote(6)"><div class="dot" style="background:#ef4444"></div><span class="note-label" id="label-6">Note 4</span></div>
-    <div class="sidebar-item" id="nav-7" onclick="switchNote(7)"><div class="dot" style="background:#8b5cf6"></div><span class="note-label" id="label-7">Note 5</span></div>
+    <div class="sidebar-item active" id="nav-0" onclick="switchNote(0)"><div class="dot" style="background:#6366f1"></div><span class="note-label" id="label-0">Note 1</span></div>
+    <div class="sidebar-item" id="nav-1" onclick="switchNote(1)"><div class="dot" style="background:#10b981"></div><span class="note-label" id="label-1">Note 2</span></div>
+    <div class="sidebar-item" id="nav-2" onclick="switchNote(2)"><div class="dot" style="background:#f59e0b"></div><span class="note-label" id="label-2">Note 3</span></div>
+    <div class="sidebar-item" id="nav-3" onclick="switchNote(3)"><div class="dot" style="background:#ef4444"></div><span class="note-label" id="label-3">Note 4</span></div>
+    <div class="sidebar-item" id="nav-4" onclick="switchNote(4)"><div class="dot" style="background:#8b5cf6"></div><span class="note-label" id="label-4">Note 5</span></div>
   </div>
   <button class="new-note-btn"><span>+</span> Nouvelle note</button>
   <div class="sidebar-footer">
-    <button onclick="exportNotes()" title="Exporter toutes les notes">⬇ Exporter</button>
-    <button onclick="triggerImport()" title="Importer des notes">⬆ Importer</button>
+    <button onclick="exportNotes()">⬇ Export</button>
+    <button onclick="triggerImport()">⬆ Import</button>
     <input type="file" id="import-input" accept=".json" style="display:none" onchange="importNotes(event)">
   </div>
 </div>
 
-<!-- ═══════════ MAIN EDITOR ═══════════ -->
+<!-- MAIN EDITOR -->
 <div class="main">
   <div class="toolbar">
     <button class="toolbar-btn" id="btn-bold" onclick="fmt('bold')" title="Gras (Ctrl+B)"><b>B</b></button>
     <button class="toolbar-btn" id="btn-italic" onclick="fmt('italic')" title="Italique (Ctrl+I)"><i>I</i></button>
     <button class="toolbar-btn" id="btn-underline" onclick="fmt('underline')" title="Souligner (Ctrl+U)"><u>U</u></button>
     <div class="toolbar-sep"></div>
-    <button class="toolbar-btn" onclick="fmt('formatBlock','h1')" title="Titre 1">H1</button>
-    <button class="toolbar-btn" onclick="fmt('formatBlock','h2')" title="Titre 2">H2</button>
-    <button class="toolbar-btn" onclick="fmt('insertUnorderedList')" title="Liste à puces">≡</button>
-    <button class="toolbar-btn" onclick="fmt('removeFormat')" title="Supprimer le formatage" style="font-size:11px">✕fmt</button>
+    <button class="toolbar-btn" onclick="fmt('formatBlock','h1')">H1</button>
+    <button class="toolbar-btn" onclick="fmt('formatBlock','h2')">H2</button>
+    <button class="toolbar-btn" onclick="fmt('insertUnorderedList')">≡</button>
+    <button class="toolbar-btn" onclick="fmt('removeFormat')" style="font-size:10px">✕fmt</button>
     <div class="toolbar-right">
-      <button class="toolbar-btn" onclick="exportCurrentNote()" title="Télécharger cette note en .txt" style="font-size:11px; padding:0 8px; width:auto;">⬇ .txt</button>
+      <button class="toolbar-btn" onclick="exportCurrentNote()" style="font-size:10px;width:auto;padding:0 8px;">⬇ .txt</button>
     </div>
   </div>
   <div class="editor-wrap">
     <div class="note-date" id="note-date">Aujourd'hui</div>
     <input class="note-title-input" id="note-title" placeholder="Titre de la note..." oninput="saveCurrentNote()">
-    <div class="note-body" id="note-body" contenteditable="true" data-placeholder="Commence à écrire ici..." oninput="saveCurrentNote(); updateToolbarState()"></div>
+    <div class="note-body" id="note-body" contenteditable="true" data-placeholder="Commence à écrire ici..." oninput="onBodyInput()"></div>
   </div>
 </div>
 
-<!-- ═══════════ TOGGLE GAME BTN (bottom right) ═══════════ -->
-<div class="toggle-game-btn" id="toggle-game-btn" onclick="toggleGameBtn()" title="Masquer le bouton jeux">
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 4H7a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h10a5 5 0 0 0 5-5V9a5 5 0 0 0-5-5zm-7 8H8v2H6v-2H4v-2h2V8h2v2h2v2zm4.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-  </svg>
+</div><!-- end app-body -->
+
+<!-- CODE PROMPT BAR (bottom, fake terminal hint) -->
+<div class="code-prompt">
+  <span class="code-prompt-text" id="code-display">_</span>
+  <span class="code-cursor">|</span>
+  <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
 </div>
 
-<!-- ═══════════ SECRET GAME BTN (bottom left) ═══════════ -->
-<div class="secret-btn" id="secret-btn" onclick="openGames()" title="Jeux">
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 4H7a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h10a5 5 0 0 0 5-5V9a5 5 0 0 0-5-5zm-7 8H8v2H6v-2H4v-2h2V8h2v2h2v2zm4.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-  </svg>
-</div>
+<!-- SECRET TOGGLE (bottom right — hides/shows game btn) -->
+<button class="secret-toggle" id="secret-toggle" onclick="toggleGameBtn()" title="">
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg>
+</button>
 
-<!-- ═══════════ SIGNUP MODAL ═══════════ -->
+<!-- GAME BUTTON (bottom left) -->
+<button class="game-btn" id="game-btn" onclick="openGames()" title="">
+  <svg viewBox="0 0 24 24"><path d="M17 4H7a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h10a5 5 0 0 0 5-5V9a5 5 0 0 0-5-5zm-7 8H8v2H6v-2H4v-2h2V8h2v2h2v2zm4.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+</button>
+
+<!-- SIGNUP MODAL -->
 <div class="modal-bg" id="signup-modal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeSignup()">✕</button>
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:22px;">
-      <div style="width:32px; height:32px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600; color:#fff;">N</div>
-      <span style="font-size:18px; font-weight:500; color:#e8e8e8;">NoteSimple</span>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div style="width:30px;height:30px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;">N</div>
+      <span style="font-size:17px;font-weight:500;color:#e8e8e8;">NoteSimple</span>
     </div>
-    <h2 style="font-size:22px; font-weight:500; color:#e8e8e8; margin-bottom:6px;">Créer un compte</h2>
-    <p style="font-size:14px; color:#888; margin-bottom:22px;">Gratuit pour toujours. Aucune carte requise.</p>
+    <h2 style="font-size:21px;font-weight:500;color:#e8e8e8;margin-bottom:5px;">Créer un compte</h2>
+    <p style="font-size:13px;color:#666;margin-bottom:20px;">Gratuit pour toujours. Aucune carte requise.</p>
     <input class="modal-input" type="text" placeholder="Prénom et nom">
     <input class="modal-input" type="email" placeholder="Adresse e-mail">
     <input class="modal-input" type="password" placeholder="Mot de passe">
     <button class="modal-btn" id="signup-submit" onclick="fakeSignup()">Créer mon compte →</button>
-    <p style="font-size:12px; color:#555; margin-top:16px; text-align:center;">Déjà un compte ? <span style="color:#888; cursor:pointer; text-decoration:underline;" onclick="closeSignup()">Se connecter</span></p>
+    <p style="font-size:11px;color:#444;margin-top:14px;text-align:center;">Déjà un compte ? <span style="color:#666;cursor:pointer;text-decoration:underline;" onclick="closeSignup()">Se connecter</span></p>
   </div>
 </div>
 
-<!-- ═══════════ GAME OVERLAY ═══════════ -->
+<!-- GAME OVERLAY -->
 <div class="game-overlay" id="game-overlay">
   <div class="game-nav">
-    <div class="game-back" onclick="closeGames()">← Retour aux notes</div>
-    <span class="game-label">// mode jeu</span>
-    <div class="game-title-bar" id="game-title-bar">Choisir un jeu</div>
-    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Plein écran</button>
+    <div class="game-back" onclick="closeGames()">← Notes</div>
+    <div class="game-title-bar" id="game-title-bar">// choisir un jeu</div>
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
   </div>
-
   <div class="game-selector" id="game-selector">
-    <div class="game-card" onclick="launchGame(0)">
-      <div class="game-icon" style="background:#1a2a4a">🏄</div>
-      <div class="game-card-name">Subway Surfers</div>
-      <div class="game-card-desc">Course infinie dans les rues. Évite les obstacles et bats ton record !</div>
-      <div class="play-badge">▶ Jouer</div>
-    </div>
-    <div class="game-card" onclick="launchGame(1)">
-      <div class="game-icon" style="background:#1a3a1a">🎈</div>
-      <div class="game-card-name">Bloons TD 4</div>
-      <div class="game-card-desc">Tower defense classique. Place tes singes et éclate les ballons !</div>
-      <div class="play-badge">▶ Jouer</div>
-    </div>
-    <div class="game-card" onclick="launchGame(2)">
-      <div class="game-icon" style="background:#2a1a1a">💀</div>
-      <div class="game-card-name">Death Run 3D</div>
-      <div class="game-card-desc">Course folle en 3D. Esquive les pièges et survive le plus longtemps possible.</div>
-      <div class="play-badge">▶ Jouer</div>
-    </div>
-    <div class="game-card" onclick="launchGame(3)">
-      <div class="game-icon" style="background:#2a2a1a">🍪</div>
-      <div class="game-card-name">Cookie Clicker</div>
-      <div class="game-card-desc">Le clicker addictif légendaire. Clique, améliore, et produis des cookies à l'infini.</div>
-      <div class="play-badge">▶ Jouer</div>
-    </div>
-    <div class="game-card" onclick="launchGame(4)">
-      <div class="game-icon" style="background:#1a1a2e">⚡</div>
-      <div class="game-card-name">Geometry Dash</div>
-      <div class="game-card-desc">Saute en rythme et évite les obstacles dans ce jeu musical addictif !</div>
-      <div class="play-badge">▶ Jouer</div>
-    </div>
-    <div class="game-card" onclick="launchGame(5)">
-      <div class="game-icon" style="background:#2a1a2e">🧠</div>
-      <div class="game-card-name">Steal a Brainrot 2</div>
-      <div class="game-card-desc">Vole le brainrot de tes adversaires dans ce jeu déjanté et chaotique !</div>
-      <div class="play-badge">▶ Jouer</div>
-    </div>
-    <div class="game-card" onclick="launchGame(6)">
-      <div class="game-icon" style="background:#1a2e1a">🪂</div>
-      <div class="game-card-name">Just Fall</div>
-      <div class="game-card-desc">Tombe et survie ! Évite les plateformes qui s'effondrent sous tes pieds.</div>
-      <div class="play-badge">▶ Jouer</div>
-    </div>
+    <div class="game-card" onclick="launchGame(0)"><div class="game-icon" style="background:#0d1b2e">🏄</div><div class="game-card-name">Subway Surfers</div><div class="game-card-desc">Course infinie dans les rues. Évite les obstacles et bats ton record !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(1)"><div class="game-icon" style="background:#0d2214">🎈</div><div class="game-card-name">Bloons TD 4</div><div class="game-card-desc">Tower defense classique. Place tes singes et éclate les ballons !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(2)"><div class="game-icon" style="background:#1e0d0d">💀</div><div class="game-card-name">Death Run 3D</div><div class="game-card-desc">Course folle en 3D. Esquive les pièges et survive le plus longtemps !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(3)"><div class="game-icon" style="background:#1e1d0a">🍪</div><div class="game-card-name">Cookie Clicker</div><div class="game-card-desc">Le clicker légendaire. Produis des millions de cookies à l'infini !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(4)"><div class="game-icon" style="background:#0d0d22">⚡</div><div class="game-card-name">Geometry Dash</div><div class="game-card-desc">Saute en rythme et évite les obstacles dans ce jeu musical addictif !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(5)"><div class="game-icon" style="background:#1a0d22">🧠</div><div class="game-card-name">Steal a Brainrot 2</div><div class="game-card-desc">Vole le brainrot de tes adversaires dans ce jeu déjanté !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(6)"><div class="game-icon" style="background:#0d1e0d">🪂</div><div class="game-card-name">Just Fall</div><div class="game-card-desc">Tombe et survie ! Évite les plateformes qui s'effondrent sous tes pieds.</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(7)"><div class="game-icon" style="background:#0d1a1e">🏎️</div><div class="game-card-name">2v2.io</div><div class="game-card-desc">Jeu de tir multijoueur en équipe. Joue avec tes amis en 2v2 !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(8)"><div class="game-icon" style="background:#0d1510">🟢</div><div class="game-card-name">Slope</div><div class="game-card-desc">Guide ta balle sur une pente infinie à grande vitesse. Réflexes requis !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(9)"><div class="game-icon" style="background:#12160d">⛏️</div><div class="game-card-name">Eagle Craft</div><div class="game-card-desc">Minecraft-like dans le navigateur. Construis et explore !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(10)"><div class="game-icon" style="background:#1a110d">🍝</div><div class="game-card-name">Italian Brainrot Obby</div><div class="game-card-desc">Parcours de parkour avec les personnages Italian Brainrot !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(11)"><div class="game-icon" style="background:#1a0d0d">🚗</div><div class="game-card-name">Crazy Cars</div><div class="game-card-desc">Course de voitures folle. Dépasse tes adversaires à toute vitesse !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(12)"><div class="game-icon" style="background:#0a1a10">🐸</div><div class="game-card-name">Crossy Road</div><div class="game-card-desc">Traverse routes et rivières sans te faire écraser. Jusqu'où iras-tu ?</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(13)"><div class="game-icon" style="background:#16110a">⛏️</div><div class="game-card-name">Idle Mining</div><div class="game-card-desc">Gère ta mine, améliore tes ouvriers et deviens le roi du minerai !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(14)"><div class="game-icon" style="background:#0d1a2e">🌍</div><div class="game-card-name">WorldGuessr</div><div class="game-card-desc">Devine où tu es dans le monde grâce aux panoramas Street View. Pour les géo-passionnés !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(15)"><div class="game-icon" style="background:#1a0d2e">🟦</div><div class="game-card-name">Block Blast</div><div class="game-card-desc">Place des blocs, complète des lignes et explose ton score dans ce puzzle addictif !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(16)"><div class="game-icon" style="background:#0d1e18">🚪</div><div class="game-card-name">Go Escape</div><div class="game-card-desc">Résous les puzzles et trouve la sortie dans ce jeu de réflexion original !</div><div class="play-badge">▶ Jouer</div></div>
+    <div class="game-card" onclick="launchGame(17)"><div class="game-icon" style="background:#120d1a">🐍</div><div class="game-card-name">Slither.io</div><div class="game-card-desc">Dévore les points, grandis et écrase tes adversaires dans cette bataille de serpents multijoueur !</div><div class="play-badge">▶ Jouer</div></div>
   </div>
-
   <div class="game-iframe-wrap" id="game-iframe-wrap">
-    <iframe id="game-frame" src="" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals"></iframe>
-    <div id="iframe-error" style="display:none; position:absolute; inset:0; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:#0e0e0e; color:#666; font-size:15px; font-family:'DM Sans',sans-serif;">
-      <span>⚠️ Ce jeu bloque l'intégration.</span>
+    <iframe id="game-frame" src="" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals allow-top-navigation-by-user-activation"></iframe>
+    <div class="iframe-fallback" id="iframe-fallback">
+      <span style="color:#555;font-size:14px;font-family:'DM Sans',sans-serif;">⚠️ Ce jeu ne peut pas s'afficher ici.</span>
       <a class="open-new-tab" id="open-tab-btn" href="#" target="_blank">Ouvrir dans un nouvel onglet</a>
-      <span style="font-size:13px; color:#444; cursor:pointer;" onclick="backToSelector()">← Choisir un autre jeu</span>
+      <span style="font-size:12px;color:#333;cursor:pointer;font-family:'DM Sans',sans-serif;" onclick="backToSelector()">← Choisir un autre jeu</span>
     </div>
   </div>
 </div>
@@ -257,20 +260,32 @@
    GAMES
 ══════════════════ */
 const GAMES = [
-  { name:'Subway Surfers',     url:'https://geet.in.net/get/subway-surfers/game.html' },
-  { name:'Bloons TD 4',        url:'https://geet.in.net/get/bloonstd-4/game.html' },
-  { name:'Death Run 3D',       url:'https://geet.in.net/get/death-run-3d/game.html' },
-  { name:'Cookie Clicker',     url:'https://geet.in.net/get/cookie-clicker/game.html' },
-  { name:'Geometry Dash',      url:'https://geet.in.net/get/geometry-dash/game.html' },
-  { name:'Steal a Brainrot 2', url:'https://classroomlesson.github.io/basic-ruffle-player/html/steal_a_brainrot_2/index.html' },
-  { name:'Just Fall',          url:'https://geet.in.net/get/just-fall/game.html' }
+  { name:'Subway Surfers',          url:'https://geet.in.net/get/subway-surfers/game.html' },
+  { name:'Bloons TD 4',             url:'https://geet.in.net/get/bloonstd-4/game.html' },
+  { name:'Death Run 3D',            url:'https://geet.in.net/get/death-run-3d/game.html' },
+  { name:'Cookie Clicker',          url:'https://geet.in.net/get/cookie-clicker/game.html' },
+  { name:'Geometry Dash',           url:'https://geet.in.net/get/geometry-dash/game.html' },
+  { name:'Steal a Brainrot 2',      url:'https://classroomlesson.github.io/basic-ruffle-player/html/steal_a_brainrot_2/index.html' },
+  { name:'Just Fall',               url:'https://geet.in.net/get/just-fall/game.html' },
+  { name:'2v2.io',                  url:'https://2v2.io/' },
+  { name:'Slope',                   url:'https://geet.in.net/get/slope/game.html' },
+  { name:'Eagle Craft',             url:'https://geet.in.net/get/eagle-craft/embed.html' },
+  { name:'Italian Brainrot Obby',   url:'https://geet.in.net/get/italian-brainrot-obby-parkour/embed.html' },
+  { name:'Crazy Cars',              url:'https://geet.in.net/get/crazy-cars/game.html' },
+  { name:'Crossy Road',             url:'https://geet.in.net/get/crossy-road/game.html' },
+  { name:'Idle Mining',             url:'https://geet.in.net/get/idle-mining/game.html' },
+  { name:'WorldGuessr',             url:'https://www.worldguessr.com/fr' },
+  { name:'Block Blast',             url:'https://html5.gamedistribution.com/rvvASMiM/3a364ed8d075418abb7849e1d63b6015/index.html?timestamp=-62135596800&countryCode=fr&siteid=79&channelid=2&siteLocale=fr&locale=fr&gd_sdk_referrer_url=https%3A%2F%2Fwww.jeu.fr%2Fjeu%2Fblock-blast&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5qZXUuZnIvamV1L2Jsb2NrLWJsYXN0IiwicGFyZW50RG9tYWluIjoiamV1LmZyIiwidG9wRG9tYWluIjoiamV1LmZyIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTgifQ%253D%253D' },
+  { name:'Go Escape',               url:'https://html5.gamedistribution.com/rvvASMiM/70095c924c1d494c952e128f35ce8594/index.html?timestamp=-62135596800&siteid=79&siteLocale=fr&locale=fr&channelid=2&gd_sdk_referrer_url=https%3A%2F%2Fwww.jeu.fr%2Fjeu%2Fgo-escape&countryCode=fr&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5qZXUuZnIvamV1L2dvLWVzY2FwZSIsInBhcmVudERvbWFpbiI6ImpldS5mciIsInRvcERvbWFpbiI6ImpldS5mciIsImhhc0ltcHJlc3Npb24iOmZhbHNlLCJsb2FkZXJFbmFibGVkIjp0cnVlLCJob3N0IjoiaHRtbDUuZ2FtZWRpc3RyaWJ1dGlvbi5jb20iLCJ2ZXJzaW9uIjoiMS41LjE4In0%253D' },
+  { name:'Slither.io',              url:'http://slither.com/io' }
 ];
 
 function openGames() {
   document.getElementById('game-overlay').classList.add('visible');
   document.getElementById('game-selector').style.display = 'grid';
   document.getElementById('game-iframe-wrap').classList.remove('visible');
-  document.getElementById('game-title-bar').textContent = 'Choisir un jeu';
+  document.getElementById('iframe-fallback').classList.remove('visible');
+  document.getElementById('game-title-bar').textContent = '// choisir un jeu';
 }
 function closeGames() {
   document.getElementById('game-overlay').classList.remove('visible');
@@ -280,16 +295,53 @@ function backToSelector() {
   document.getElementById('game-frame').src = '';
   document.getElementById('game-selector').style.display = 'grid';
   document.getElementById('game-iframe-wrap').classList.remove('visible');
-  document.getElementById('game-title-bar').textContent = 'Choisir un jeu';
+  document.getElementById('iframe-fallback').classList.remove('visible');
+  document.getElementById('game-title-bar').textContent = '// choisir un jeu';
 }
 function launchGame(idx) {
   const g = GAMES[idx];
   document.getElementById('game-selector').style.display = 'none';
   document.getElementById('game-iframe-wrap').classList.add('visible');
+  document.getElementById('iframe-fallback').classList.remove('visible');
   document.getElementById('game-title-bar').textContent = g.name;
   document.getElementById('open-tab-btn').href = g.url;
-  document.getElementById('iframe-error').style.display = 'none';
-  document.getElementById('game-frame').src = g.url;
+  const frame = document.getElementById('game-frame');
+  // Reset src first to avoid stale load events
+  frame.src = '';
+  // Clear previous listeners
+  frame.onload = null;
+  frame.onerror = null;
+  let loaded = false;
+  // For sites that block framing, the load event still fires but content is blank
+  // We detect this by checking after a delay if the frame is truly accessible
+  frame.onload = () => {
+    loaded = true;
+    // Cross-origin check: try to access location — throws if blocked
+    setTimeout(() => {
+      try {
+        // This throws for cross-origin — meaning game loaded fine in iframe
+        // eslint-disable-next-line no-unused-vars
+        const test = frame.contentWindow.location.href;
+        // If we get here it's same-origin, check body
+        if (!frame.contentDocument || !frame.contentDocument.body || frame.contentDocument.body.innerHTML.trim() === '') {
+          document.getElementById('iframe-fallback').classList.add('visible');
+        }
+      } catch(e) {
+        // Cross-origin: iframe loaded but we can't inspect it — that's normal & fine, game is showing
+        // No fallback needed
+      }
+    }, 500);
+  };
+  frame.onerror = () => {
+    document.getElementById('iframe-fallback').classList.add('visible');
+  };
+  // Fallback: if load never fires after 10s (blocked before load), show fallback
+  setTimeout(() => {
+    if (!loaded) {
+      document.getElementById('iframe-fallback').classList.add('visible');
+    }
+  }, 10000);
+  frame.src = g.url;
 }
 function toggleFullscreen() {
   const el = document.getElementById('game-overlay');
@@ -298,34 +350,92 @@ function toggleFullscreen() {
 }
 
 /* ══════════════════
+   SECRET CODE — type "jeu" anywhere on the page (not in editor) to open games
+══════════════════ */
+let codeBuffer = '';
+let codeTimeout = null;
+const SECRET_CODE = 'jeu';
+
+document.addEventListener('keydown', e => {
+  // rich text shortcuts in editor
+  const body = document.getElementById('note-body');
+  if ((e.ctrlKey || e.metaKey) && document.activeElement === body) {
+    if (e.key === 'b') { e.preventDefault(); fmt('bold'); return; }
+    if (e.key === 'i') { e.preventDefault(); fmt('italic'); return; }
+    if (e.key === 'u') { e.preventDefault(); fmt('underline'); return; }
+  }
+  // Escape in game overlay
+  if (e.key === 'Escape' && document.getElementById('game-overlay').classList.contains('visible')) {
+    if (document.getElementById('game-selector').style.display !== 'grid') backToSelector();
+    else closeGames();
+    return;
+  }
+  // Secret code — only when editor is NOT focused
+  if (document.activeElement !== body && document.activeElement !== document.getElementById('note-title')) {
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      codeBuffer += e.key.toLowerCase();
+      if (codeBuffer.length > SECRET_CODE.length) codeBuffer = codeBuffer.slice(-SECRET_CODE.length);
+      updateCodeDisplay();
+      clearTimeout(codeTimeout);
+      codeTimeout = setTimeout(() => { codeBuffer = ''; updateCodeDisplay(); }, 3000);
+      if (codeBuffer === SECRET_CODE) {
+        codeBuffer = '';
+        updateCodeDisplay();
+        setTimeout(() => openGames(), 100);
+      }
+    }
+  }
+});
+
+function updateCodeDisplay() {
+  const el = document.getElementById('code-display');
+  if (codeBuffer.length > 0) {
+    el.style.color = '#2a2a2a';
+    el.textContent = codeBuffer;
+  } else {
+    el.style.color = '#1a1a1a';
+    el.textContent = '_';
+  }
+}
+
+/* ══════════════════
    TOGGLE GAME BUTTON
 ══════════════════ */
 let gameBtnVisible = true;
 function toggleGameBtn() {
   gameBtnVisible = !gameBtnVisible;
-  const sb = document.getElementById('secret-btn');
-  const tb = document.getElementById('toggle-game-btn');
-  sb.classList.toggle('hidden', !gameBtnVisible);
-  tb.title = gameBtnVisible ? 'Masquer le bouton jeux' : 'Afficher le bouton jeux';
-  tb.style.opacity = gameBtnVisible ? '0.3' : '0.65';
+  const gb = document.getElementById('game-btn');
+  if (gameBtnVisible) {
+    gb.classList.remove('hidden-btn');
+    gb.classList.add('show');
+  } else {
+    gb.classList.add('hidden-btn');
+    gb.classList.remove('show');
+  }
 }
+// Show game button after 2s of inactivity on the page
+setTimeout(() => {
+  document.getElementById('game-btn').classList.add('show');
+}, 2000);
 
 /* ══════════════════
    NOTES
 ══════════════════ */
-const NOTE_IDS = [3,4,5,6,7];
-const notes = {};
-NOTE_IDS.forEach((id,i) => notes[id] = { title:'', html:'', date:'Aujourd\'hui', label:'Note '+(i+1) });
-let currentNote = 3;
+const NUM_NOTES = 5;
+const notes = Array.from({length: NUM_NOTES}, (_, i) => ({
+  title: '', html: '', date: 'Aujourd\'hui', label: 'Note '+(i+1)
+}));
+let currentNote = 0;
 
-function switchNote(id) {
+function switchNote(idx) {
   saveCurrentNote();
-  currentNote = id;
-  NOTE_IDS.forEach(i => document.getElementById('nav-'+i).classList.toggle('active', i===id));
-  const n = notes[id];
+  currentNote = idx;
+  for (let i = 0; i < NUM_NOTES; i++) document.getElementById('nav-'+i).classList.toggle('active', i===idx);
+  const n = notes[idx];
   document.getElementById('note-title').value = n.title;
   document.getElementById('note-body').innerHTML = n.html;
   document.getElementById('note-date').textContent = n.date;
+  updateToolbarState();
 }
 
 function saveCurrentNote() {
@@ -339,6 +449,18 @@ function saveCurrentNote() {
   const lbl = n.title.trim() || n.label;
   const el = document.getElementById('label-'+currentNote);
   if (el) el.textContent = lbl.substring(0,22);
+  // update status
+  document.getElementById('status-saved').textContent = '● Sauvegardé';
+}
+
+function onBodyInput() {
+  saveCurrentNote();
+  updateToolbarState();
+  document.getElementById('status-saved').textContent = '○ Modification…';
+  clearTimeout(window._saveTimer);
+  window._saveTimer = setTimeout(() => {
+    document.getElementById('status-saved').textContent = '● Sauvegardé';
+  }, 800);
 }
 
 /* ══════════════════
@@ -350,39 +472,35 @@ function fmt(cmd, val) {
   updateToolbarState();
   saveCurrentNote();
 }
-
 function updateToolbarState() {
   document.getElementById('btn-bold').classList.toggle('active', document.queryCommandState('bold'));
   document.getElementById('btn-italic').classList.toggle('active', document.queryCommandState('italic'));
   document.getElementById('btn-underline').classList.toggle('active', document.queryCommandState('underline'));
 }
-
 document.getElementById('note-body').addEventListener('keyup', updateToolbarState);
 document.getElementById('note-body').addEventListener('mouseup', updateToolbarState);
 
-document.addEventListener('keydown', e => {
-  const body = document.getElementById('note-body');
-  if ((e.ctrlKey || e.metaKey) && document.activeElement === body) {
-    if (e.key === 'b') { e.preventDefault(); fmt('bold'); }
-    if (e.key === 'i') { e.preventDefault(); fmt('italic'); }
-    if (e.key === 'u') { e.preventDefault(); fmt('underline'); }
-  }
-  if (e.key === 'Escape' && document.getElementById('game-overlay').classList.contains('visible')) {
-    if (document.getElementById('game-selector').style.display !== 'grid') backToSelector();
-    else closeGames();
-  }
-});
-
 /* ══════════════════
-   EXPORT / IMPORT
+   EXPORT / IMPORT  (fixed)
 ══════════════════ */
 function exportNotes() {
   saveCurrentNote();
-  const blob = new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
+  // Build a clean serializable object
+  const data = {};
+  notes.forEach((n, i) => {
+    data[i] = { title: n.title, html: n.html, date: n.date, label: n.label };
+  });
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = 'notesimple-export.json';
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('Notes exportées !');
 }
 
 function exportCurrentNote() {
@@ -390,35 +508,56 @@ function exportCurrentNote() {
   const n = notes[currentNote];
   const tmp = document.createElement('div');
   tmp.innerHTML = n.html;
-  const title = n.title ? n.title + '\n' + '─'.repeat(n.title.length) + '\n\n' : '';
-  const blob = new Blob([title + (tmp.innerText || tmp.textContent)], {type:'text/plain;charset=utf-8'});
+  const sep = n.title ? n.title + '\n' + '─'.repeat(Math.max(4, n.title.length)) + '\n\n' : '';
+  const text = sep + (tmp.innerText || tmp.textContent || '');
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (n.title || 'note') + '.txt';
+  a.href = url;
+  a.download = (n.title.replace(/[^a-zA-Z0-9\s\-_àâéèêëîïôùûüç]/g,'').trim() || 'note') + '.txt';
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('Note téléchargée !');
 }
 
-function triggerImport() { document.getElementById('import-input').click(); }
+function triggerImport() {
+  const inp = document.getElementById('import-input');
+  inp.value = ''; // reset so same file can be re-imported
+  inp.click();
+}
 
 function importNotes(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = ev => {
+  reader.onload = function(ev) {
     try {
-      const data = JSON.parse(ev.target.result);
-      NOTE_IDS.forEach(id => {
-        if (data[id]) {
-          notes[id].title = data[id].title || '';
-          notes[id].html  = data[id].html  || '';
-          notes[id].date  = data[id].date  || 'Importé';
+      const raw = ev.target.result;
+      const data = JSON.parse(raw);
+      let count = 0;
+      // Support both numeric keys (0-4) and old format (3-7)
+      const keyMap = { '3':0, '4':1, '5':2, '6':3, '7':4 };
+      Object.keys(data).forEach(k => {
+        const idx = (k >= '0' && k <= '4') ? parseInt(k) : (keyMap[k] !== undefined ? keyMap[k] : -1);
+        if (idx >= 0 && idx < NUM_NOTES && data[k]) {
+          notes[idx].title = data[k].title || '';
+          notes[idx].html  = data[k].html  || '';
+          notes[idx].date  = data[k].date  || 'Importé';
+          const lbl = notes[idx].title.trim() || notes[idx].label;
+          const el = document.getElementById('label-'+idx);
+          if (el) el.textContent = lbl.substring(0,22);
+          count++;
         }
       });
       switchNote(currentNote);
-      toast('Notes importées avec succès !');
-    } catch { toast('Fichier invalide — JSON attendu.', true); }
-    e.target.value = '';
+      toast(count + ' note(s) importée(s) avec succès !');
+    } catch(err) {
+      toast('Erreur : fichier JSON invalide.', true);
+    }
   };
+  reader.onerror = function() { toast('Erreur de lecture du fichier.', true); };
   reader.readAsText(file);
 }
 
@@ -428,22 +567,30 @@ function importNotes(e) {
 function toast(msg, err) {
   const t = document.createElement('div');
   t.textContent = msg;
-  t.style.cssText = `position:fixed;bottom:62px;left:50%;transform:translateX(-50%);background:${err?'#2a1010':'#0f2a1a'};color:${err?'#f87171':'#4ade80'};border:1px solid ${err?'#7f1d1d':'#14532d'};padding:10px 20px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;z-index:400;white-space:nowrap;transition:opacity .4s;`;
+  t.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(0);
+    background:${err ? '#2a0f0f' : '#0f1f15'};
+    color:${err ? '#f87171' : '#4ade80'};
+    border:1px solid ${err ? '#5a1a1a' : '#1a4a28'};
+    padding:9px 18px;border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;
+    z-index:500;white-space:nowrap;opacity:1;transition:opacity .4s;pointer-events:none;`;
   document.body.appendChild(t);
-  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 2600);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 2800);
 }
 
 /* ══════════════════
    SIGNUP
 ══════════════════ */
-function openSignup() { document.getElementById('signup-modal').style.display='flex'; }
-function closeSignup() { document.getElementById('signup-modal').style.display='none'; }
+function openSignup() { document.getElementById('signup-modal').classList.add('open'); }
+function closeSignup() { document.getElementById('signup-modal').classList.remove('open'); }
 function fakeSignup() {
   const btn = document.getElementById('signup-submit');
   btn.textContent = '✓ Compte créé !';
   btn.style.background = '#059669';
-  setTimeout(()=>{ closeSignup(); btn.textContent='Créer mon compte →'; btn.style.background=''; }, 1400);
+  setTimeout(() => { closeSignup(); btn.textContent='Créer mon compte →'; btn.style.background=''; }, 1500);
 }
+
+// Close modals on backdrop click
+document.getElementById('signup-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSignup(); });
 </script>
 </body>
 </html>
